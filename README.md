@@ -1,4 +1,4 @@
-**Simple VC 3-Band Equalizer
+**Simple VC 3-Band Equalizer**
 
 
 low band from 0Hz to 880Hz 
