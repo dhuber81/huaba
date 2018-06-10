@@ -28,7 +28,7 @@ struct EQ3 : Module {
 
 	EQSTATE *eq=new EQSTATE();
 	const double vsa = (1.0 / 4294967295.0);   // Denormal Fix
-
+	
 	EQ3() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {	
 		init_3band_state(eq, 880, 5000, engineGetSampleRate());
 	}
@@ -114,10 +114,8 @@ struct EQ3Widget : ModuleWidget {
 		addParam(ParamWidget::create<RoundBlackKnob>(Vec(8, 215), module, EQ3::LOW_PARAM, 0.0, 2.0, 1.0));
 		addInput(Port::create<PJ301MPort>(Vec(10.5, 248), Port::INPUT, module, EQ3::CV3_INPUT));
 		
-		addInput(Port::create<PJ301MPort>(Vec(10.5, 280), Port::INPUT, module, 
-EQ3::IN1_INPUT));
-		addOutput(Port::create<PJ301MPort>(Vec(10.5, 320), Port::OUTPUT, 
-module, EQ3::OUT1_OUTPUT));
+		addInput(Port::create<PJ301MPort>(Vec(10.5, 280), Port::INPUT, module, EQ3::IN1_INPUT));
+		addOutput(Port::create<PJ301MPort>(Vec(10.5, 320), Port::OUTPUT, module, EQ3::OUT1_OUTPUT));
 	}
 };
 
