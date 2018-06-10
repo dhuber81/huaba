@@ -1,0 +1,8 @@
+/build
+/dist
+/plugin.dylib
+/plugin.dll
+/plugin.so
+/.vscode
+.DS_Store
+Miraculix.code-workspace
