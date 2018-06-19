@@ -13,11 +13,11 @@
 **Switched Multiple**
 
 
-- Multiple with A and B bus. 
+- Multiple with A and B bus
 
 - Merges signals on the selected output bus
 
-- On middle position signal is off.
+- On middle position signal is off
 
 ![alt text](/screens/swmultiple.png)
 
