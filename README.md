@@ -9,4 +9,11 @@
 
 ![alt text](/screens/eq3.png)
 
+**Switched Multiple**
+
+
+Multiple with A and B BUS. Middle position is off.
+
+![alt text](/screens/swmultiple.png)
+
 please, [DONATE](http://paypal.me/DanielHuber81) so i can buy some beer and develop more modules.
