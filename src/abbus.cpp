@@ -1,7 +1,7 @@
-#include "swmultiple.hpp"
+#include "abbus.hpp"
 #include "math.h"
 
-struct SwMultiple : Module {
+struct ABBus : Module {
 	enum ParamIds {
 		SW1_PARAM,
 		SW2_PARAM,
@@ -30,12 +30,12 @@ struct SwMultiple : Module {
 		NUM_OUTPUTS
 	};
 
-	SwMultiple() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {}
+	ABBus() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {}
 
 	void step() override;
 };
 
-void SwMultiple::step() {
+void ABBus::step() {
 	float outa=0.0;
 	float outb=0.0;
 
@@ -50,9 +50,9 @@ void SwMultiple::step() {
 	outputs[OUTB_OUTPUT].value = outb;
 }
 
-struct SwMultipleWidget : ModuleWidget {
-	SwMultipleWidget(SwMultiple *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/SwMultiple.svg")));
+struct ABBusWidget : ModuleWidget {
+	ABBusWidget(ABBus *module) : ModuleWidget(module) {
+		setPanel(SVG::load(assetPlugin(plugin, "res/ABBus.svg")));
 
 		addChild(Widget::create<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -62,12 +62,12 @@ struct SwMultipleWidget : ModuleWidget {
 		const float offset_y = 40, delta_y = 26.5+3, offset_x=2;
 
 		for( int i=0; i<8; i++) {
-			addInput(Port::create<PJ301MPort>(Vec(offset_x, offset_y + i*delta_y), Port::INPUT, module, SwMultiple::IN1_INPUT+i));			
-			addParam(ParamWidget::create<dh_switch3>(Vec(offset_x+27, offset_y+6 + i*delta_y), module, SwMultiple::SW1_PARAM+i, 0.0, 2.0, 1.0));		
+			addInput(Port::create<PJ301MPort>(Vec(offset_x, offset_y + i*delta_y), Port::INPUT, module, ABBus::IN1_INPUT+i));			
+			addParam(ParamWidget::create<dh_switch3>(Vec(offset_x+27, offset_y+6 + i*delta_y), module, ABBus::SW1_PARAM+i, 0.0, 2.0, 1.0));		
 		}
-		addOutput(Port::create<PJ301MPort>(Vec(offset_x+1.5, 320), Port::OUTPUT, module, SwMultiple::OUTA_OUTPUT));
-		addOutput(Port::create<PJ301MPort>(Vec(offset_x+29, 320), Port::OUTPUT, module, SwMultiple::OUTB_OUTPUT));
+		addOutput(Port::create<PJ301MPort>(Vec(offset_x+1.5, 320), Port::OUTPUT, module, ABBus::OUTA_OUTPUT));
+		addOutput(Port::create<PJ301MPort>(Vec(offset_x+29, 320), Port::OUTPUT, module, ABBus::OUTB_OUTPUT));
 	}
 };
 
-Model *modelSwMultiple = Model::create<SwMultiple, SwMultipleWidget>("huaba", "Switched Multiple", "Switched Multiple", UTILITY_TAG, MULTIPLE_TAG);
+Model *modelABBus = Model::create<ABBus, ABBusWidget>("huaba", "A+B Bus", "A+B Bus", UTILITY_TAG, MULTIPLE_TAG);
