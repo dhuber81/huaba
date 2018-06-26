@@ -6,7 +6,7 @@ using namespace rack;
 extern Plugin *plugin;
 
 // Forward-declare each Model, defined in each module source file
-extern Model *modelSwMultiple;
+extern Model *modelABBus;
 
 // Exports 
 struct dh_switch3 : SVGSwitch, ToggleSwitch {
