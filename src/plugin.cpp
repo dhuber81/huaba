@@ -1,7 +1,6 @@
 #include "eq3.hpp"
 #include "abbus.hpp"
 
-
 Plugin *pluginInstance;
 
 void init(Plugin *p) {
