@@ -30,44 +30,45 @@ struct ABBus : Module {
 		NUM_OUTPUTS
 	};
 
-	ABBus() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {}
+	ABBus() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS);
+		for(int i=0; i<NUM_PARAMS; i++) {
+			configParam(SW1_PARAM+i, 0.0f, 2.0f, 1.0f);
+		}
+	}
 
-	void step() override;
+	void process(const ProcessArgs& args) override;
 };
 
-void ABBus::step() {
+void ABBus::process(const ProcessArgs& args) {
 	float outa=0.0;
 	float outb=0.0;
 
-	for(int i=0; i<8; i++) {
-		if(params[SW1_PARAM+i].value == 2.0)
-			outa += inputs[IN1_INPUT+i].normalize(0.0);
-		if(params[SW1_PARAM+i].value == 0.0)			
-			outb += inputs[IN1_INPUT+i].normalize(0.0);	
+	for(int i=0; i<NUM_PARAMS; i++) {
+		if(params[SW1_PARAM+i].getValue() == 2.0)
+			outa += inputs[IN1_INPUT+i].getNormalVoltage(0.0);
+		if(params[SW1_PARAM+i].getValue() == 0.0)			
+			outb += inputs[IN1_INPUT+i].getNormalVoltage(0.0);	
 	}
 	
-	outputs[OUTA_OUTPUT].value = outa;
-	outputs[OUTB_OUTPUT].value = outb;
+	outputs[OUTA_OUTPUT].setVoltage(outa);
+	outputs[OUTB_OUTPUT].setVoltage(outb);
 }
 
 struct ABBusWidget : ModuleWidget {
-	ABBusWidget(ABBus *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/ABBus.svg")));
-
-		addChild(Widget::create<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-
+	ABBusWidget(ABBus *module) {
+		setModule(module);
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ABBus.svg")));
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH+8, 0)));		
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH+8, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));		
 		const float offset_y = 40, delta_y = 26.5+3, offset_x=2;
-
-		for( int i=0; i<8; i++) {
-			addInput(Port::create<PJ301MPort>(Vec(offset_x, offset_y + i*delta_y), Port::INPUT, module, ABBus::IN1_INPUT+i));			
-			addParam(ParamWidget::create<dh_switch3>(Vec(offset_x+27, offset_y+6 + i*delta_y), module, ABBus::SW1_PARAM+i, 0.0, 2.0, 1.0));		
+		for( int i=0; i<ABBus::NUM_PARAMS; i++) {
+			addInput(createInput<PJ301MPort>(Vec(offset_x, offset_y + i*delta_y), module, ABBus::IN1_INPUT+i));			
+			addChild(createParam<dh_switch3>(Vec(offset_x+27,  offset_y+6 + i*delta_y), module, ABBus::SW1_PARAM+i));
 		}
-		addOutput(Port::create<PJ301MPort>(Vec(offset_x+1.5, 320), Port::OUTPUT, module, ABBus::OUTA_OUTPUT));
-		addOutput(Port::create<PJ301MPort>(Vec(offset_x+29, 320), Port::OUTPUT, module, ABBus::OUTB_OUTPUT));
+		addOutput(createOutput<PJ301MPort>(Vec(offset_x+1.5, 320), module, ABBus::OUTA_OUTPUT));
+		addOutput(createOutput<PJ301MPort>(Vec(offset_x+29, 320), module, ABBus::OUTB_OUTPUT));
 	}
 };
 
-Model *modelABBus = Model::create<ABBus, ABBusWidget>("huaba", "A+B Bus", "A+B Bus", UTILITY_TAG, MULTIPLE_TAG);
+Model *modelABBus = createModel<ABBus, ABBusWidget>("ABBus");

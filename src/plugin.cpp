@@ -2,14 +2,13 @@
 #include "abbus.hpp"
 
 
-Plugin *plugin;
+Plugin *pluginInstance;
 
 void init(Plugin *p) {
-	plugin = p;
+	pluginInstance = p;
 	p->slug = TOSTRING(SLUG);
-	p->version = TOSTRING(VERSION);
 
-	// Add all Models defined throughout the plugin
+	// Add all Models defined throughout the pluginInstance
 	p->addModel(modelEQ3);
 	p->addModel(modelABBus);
 }

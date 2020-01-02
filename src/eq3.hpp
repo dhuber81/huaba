@@ -3,7 +3,7 @@
 using namespace rack;
 
 // Forward-declare the Plugin
-extern Plugin *plugin;
+extern Plugin *pluginInstance;
 
 // Forward-declare each Model, defined in each module source file
 extern Model *modelEQ3;

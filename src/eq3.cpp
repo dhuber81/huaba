@@ -8,6 +8,7 @@ struct EQ3 : Module {
 		HIGH_PARAM,
 		NUM_PARAMS
 	};
+	
 	enum InputIds {
 		IN1_INPUT,
 		IN2_INPUT,
@@ -26,13 +27,18 @@ struct EQ3 : Module {
 		NUM_LIGHTS
 	};
 
-	EQSTATE *eq=new EQSTATE();
+
+	EQSTATE *eq = new EQSTATE();
 	const double vsa = (1.0 / 4294967295.0);   // Denormal Fix
 
-	EQ3() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {	
-		init_3band_state(eq, 880, 5000, engineGetSampleRate());
+	EQ3() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);	
+		configParam(HIGH_PARAM, 0.0f, 2.0f, 1.0f);
+		configParam(LOW_PARAM, 0.0f, 2.0f, 1.0f);
+		configParam(MID_PARAM, 0.0f, 2.0f, 1.0f);
+		init_3band_state(eq, 880, 5000, APP->engine->getSampleRate());
 	}
-	void step() override;
+	void process(const ProcessArgs& args) override;
 
 	void init_3band_state(EQSTATE* es, int lowfreq, int highfreq, int mixfreq) {
 		// Clear state
@@ -84,39 +90,38 @@ struct EQ3 : Module {
 	}
 };
 
-void EQ3::step() {
+void EQ3::process(const ProcessArgs& args) {
 	
-	eq->lg = clamp(params[LOW_PARAM].value + inputs[CV3_INPUT].value / 10.0f, 0.0f, 2.0f);
-	eq->mg = clamp(params[MID_PARAM].value + inputs[CV2_INPUT].value / 10.0f, 0.0f, 2.0f);
-	eq->hg = clamp(params[HIGH_PARAM].value + inputs[CV1_INPUT].value / 10.0f, 0.0f, 2.0f);
+	eq->lg = clamp(params[LOW_PARAM].getValue() + inputs[CV3_INPUT].getVoltage() / 10.0f, 0.0f, 2.0f);
+	eq->mg = clamp(params[MID_PARAM].getValue() + inputs[CV2_INPUT].getVoltage() / 10.0f, 0.0f, 2.0f);
+	eq->hg = clamp(params[HIGH_PARAM].getValue() + inputs[CV1_INPUT].getVoltage() / 10.0f, 0.0f, 2.0f);
 
-	if (outputs[OUT1_OUTPUT].active && inputs[IN1_INPUT].active)
-		outputs[OUT1_OUTPUT].value = do_3band(eq, inputs[IN1_INPUT].value);
-	if (outputs[OUT2_OUTPUT].active && inputs[IN2_INPUT].active)
-		outputs[OUT2_OUTPUT].value = do_3band(eq, inputs[IN2_INPUT].value);
+	if (outputs[OUT1_OUTPUT].isConnected() && inputs[IN1_INPUT].isConnected())
+		outputs[OUT1_OUTPUT].setVoltage(do_3band(eq, inputs[IN1_INPUT].getVoltage()));
+	if (outputs[OUT2_OUTPUT].isConnected() && inputs[IN2_INPUT].isConnected())
+		outputs[OUT2_OUTPUT].setVoltage(do_3band(eq, inputs[IN2_INPUT].getVoltage()));
 }
 
 struct EQ3Widget : ModuleWidget {
-	EQ3Widget(EQ3 *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/EQ3.svg")));
+	EQ3Widget(EQ3 *module) {
+		setModule(module);
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/EQ3.svg")));
 
-		addChild(Widget::create<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(ParamWidget::create<RoundBlackKnob>(Vec(8, 56), module, EQ3::HIGH_PARAM, 0.0, 2.0, 1.0));
-		addInput(Port::create<PJ301MPort>(Vec(10.5, 89), Port::INPUT, module, EQ3::CV1_INPUT));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 56), module, EQ3::HIGH_PARAM));
+		addInput(createInput<PJ301MPort>(Vec(10.5, 89), module, EQ3::CV1_INPUT));
 
-		addParam(ParamWidget::create<RoundBlackKnob>(Vec(8, 136), module, EQ3::MID_PARAM, 0.0, 2.0, 1.0));
-		addInput(Port::create<PJ301MPort>(Vec(10.5, 169), Port::INPUT, module, EQ3::CV2_INPUT));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 136), module, EQ3::MID_PARAM));
+		addInput(createInput<PJ301MPort>(Vec(10.5, 169), module, EQ3::CV2_INPUT));
 
-		addParam(ParamWidget::create<RoundBlackKnob>(Vec(8, 215), module, EQ3::LOW_PARAM, 0.0, 2.0, 1.0));
-		addInput(Port::create<PJ301MPort>(Vec(10.5, 248), Port::INPUT, module, EQ3::CV3_INPUT));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 215), module, EQ3::LOW_PARAM));
+		addInput(createInput<PJ301MPort>(Vec(10.5, 248), module, EQ3::CV3_INPUT));
 		
-		addInput(Port::create<PJ301MPort>(Vec(10.5, 280), Port::INPUT, module, EQ3::IN1_INPUT));
-		addOutput(Port::create<PJ301MPort>(Vec(10.5, 320), Port::OUTPUT, module, EQ3::OUT1_OUTPUT));
+		addInput(createInput<PJ301MPort>(Vec(10.5, 280), module, EQ3::IN1_INPUT));
+		addOutput(createOutput<PJ301MPort>(Vec(10.5, 320), module, EQ3::OUT1_OUTPUT));
 	}
 };
 
-Model *modelEQ3 = Model::create<EQ3, EQ3Widget>("huaba", "EQ3", "EQ3", EQUALIZER_TAG);
+Model *modelEQ3 = createModel<EQ3, EQ3Widget>("EQ3");
